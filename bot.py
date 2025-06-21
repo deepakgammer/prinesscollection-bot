@@ -162,9 +162,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 # Main
 def main():
-    import os
-app = ApplicationBuilder().token(os.getenv("7892449471:AAG_pBNvlyiReF2CGdAn9pWlUm3Abs9458M")).build()
-
+    app = ApplicationBuilder().token(os.getenv("7892449471:AAG_pBNvlyiReF2CGdAn9pWlUm3Abs9458M")).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -180,6 +178,3 @@ app = ApplicationBuilder().token(os.getenv("7892449471:AAG_pBNvlyiReF2CGdAn9pWlU
 
     app.add_handler(conv_handler)
     app.run_polling()
-
-if __name__ == "__main__":
-    main()
