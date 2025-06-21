@@ -1,7 +1,14 @@
 import logging
 import os
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, ConversationHandler, filters
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    ConversationHandler,
+    filters,
+)
 from telegram.constants import ChatAction
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -46,7 +53,7 @@ async def ask_product_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text("Please enter a valid number greater than 0.")
         return ASK_PRODUCT_COUNT
 
-# Keep asking for all product names
+# Collect product names
 async def collect_products(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data_dict['product_list'].append(update.message.text)
     user_data_dict['current_product'] += 1
@@ -58,19 +65,19 @@ async def collect_products(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text("Please enter your delivery address:")
         return ASK_ADDRESS
 
-# Ask amount
+# Ask for total amount
 async def ask_amount(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data_dict['address'] = update.message.text
     await update.message.reply_text("Enter the product total amount (in Rs.):")
     return ASK_AMOUNT
 
-# Ask shipping
+# Ask for shipping fee
 async def ask_shipping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data_dict['amount'] = update.message.text
     await update.message.reply_text("Enter the shipping fee (in Rs.):")
     return ASK_SHIPPING
 
-# Generate and send PDF
+# Generate the PDF bill
 async def generate_bill(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data_dict['shipping'] = update.message.text
     total = float(user_data_dict['amount']) + float(user_data_dict['shipping'])
@@ -86,7 +93,7 @@ async def generate_bill(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     # Title
     c.setFillColor(colors.darkblue)
     c.setFont("Helvetica-Bold", 22)
-    c.drawString(50, height - 80, "Princess Collection")
+    c.drawString(50, height - 80, BUSINESS_NAME)
 
     # Logo
     try:
@@ -139,7 +146,7 @@ async def generate_bill(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     y -= 25
     c.setFillColor(colors.green)
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(50, y, f"Grand Total: Rs. {total}")
+    c.drawString(50, y, f"Grand Total: Rs. {total:.2f}")
 
     # Footer
     y -= 50
@@ -160,9 +167,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data_dict.clear()
     return ConversationHandler.END
 
-# Main
+# Main entry
 def main():
-    app = ApplicationBuilder().token(os.getenv("7892449471:AAG_pBNvlyiReF2CGdAn9pWlUm3Abs9458M")).build()
+    app = ApplicationBuilder().token(os.getenv("BOT_TOKEN")).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -178,3 +185,7 @@ def main():
 
     app.add_handler(conv_handler)
     app.run_polling()
+
+# Run it
+if __name__ == "__main__":
+    main()
