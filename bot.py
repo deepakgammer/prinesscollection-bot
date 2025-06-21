@@ -38,6 +38,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("Vanakkam! Welcome to Princess Collection Bot.\nHow many products are you ordering?")
     return ASK_PRODUCT_COUNT
 
+# /restart
+async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_data_dict.clear()
+    await update.message.reply_text("Restarting the order process...\nHow many products are you ordering?")
+    return ASK_PRODUCT_COUNT
+
+# /cancel
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("Order cancelled. Start again anytime.")
+    user_data_dict.clear()
+    return ConversationHandler.END
+
 # Ask how many products
 async def ask_product_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -161,12 +173,6 @@ async def generate_bill(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     user_data_dict.clear()
     return ConversationHandler.END
 
-# /cancel
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text("Order cancelled. Start again anytime.")
-    user_data_dict.clear()
-    return ConversationHandler.END
-
 # Main entry
 def main():
     app = ApplicationBuilder().token(os.getenv("BOT_TOKEN")).build()
@@ -180,10 +186,15 @@ def main():
             ASK_AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_shipping)],
             ASK_SHIPPING: [MessageHandler(filters.TEXT & ~filters.COMMAND, generate_bill)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[
+            CommandHandler("cancel", cancel),
+            CommandHandler("restart", restart)
+        ],
     )
 
     app.add_handler(conv_handler)
+    app.add_handler(CommandHandler("restart", restart))
+    app.add_handler(CommandHandler("cancel", cancel))
     app.run_polling()
 
 # Run it
